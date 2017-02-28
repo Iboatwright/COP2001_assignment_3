@@ -24,18 +24,18 @@
 using namespace std;
 
 // Reads and returns valid coefficients from stdin.
-void readCoeffs(double&, double&, double&); 
+void readCoeffs(double, int); 
 
 // Calculates and returns the discriminant.
-double discr(double, double, double);
+double discr(double[], int);
 
 // If the discriminant is zero or greater, the roots are computed
 // and stored in global variables, then returns true.
-bool equSolver(double, double, double);
+bool equSolver(double[], int);
 
 // Appends real roots to the file. Otherwise prints a message
 // to stdout that no real roots exists.
-void outResults(double, double, double, bool, ofstream&);
+void outResults(double[], bool, ofstream&);
 
 int main(int argc, char* argv[]) {
   // local constants
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
   // Each iteration calculates one quadratic equation.
   for (int i=0; i < number; i++){
     // Operator enters values for the coefficients.
-    readCoeffs(a, b, c);
+    readCoeffs(coeffs);
     
     // Determines if there are real roots. If so calculates the roots. 
     flag = equSolver(a, b, c);
@@ -67,20 +67,20 @@ int main(int argc, char* argv[]) {
 
 // Operator inputs coefficients.  If zero is entered for coeffiecient a, an
 // error message is displayed requesting a new entry.
-void readCoeffs(double& a, double& b, double& c){
+void readCoeffs(double& coeffs){
   while (true){  // Runs ad-infinitum until break condition is met.
     cout << "\nEnter coefficient a: "; 
-    cin >> a;
-    if (a) break;  // a must not equal zero 
+    cin >> *coeffs;
+    if (*coeffs) break;  // a must not equal zero 
     else {  // operator entered zero for coefficient a
       cout << "\nInvalid entry. Please enter a non-zero "\
            "value for a." << endl;
     }
   }
   cout << "\nEnter coefficient b: "; 
-  cin >> b;
+  cin >> *++coeffs;
   cout << "\nEnter coefficient c: "; 
-  cin >> c;
+  cin >> *++coeffs;
   return; 
 }
 
