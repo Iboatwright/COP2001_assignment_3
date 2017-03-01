@@ -14,7 +14,9 @@
    message is printed to stdout. 
  ***************************************************************************/
 
-//TODO: update prototypes and functions to use arrays
+//TODO 1: update functions to use arrays.
+//TODO 2: validate inputs (no idea why bothering in C++): http://www.cplusplus.com/forum/beginner/13044/#msg62827
+//TODO 3: want to use pointers to handle arrays in functions
  
 #include <iostream>
 #include <cmath>
@@ -24,18 +26,20 @@
 using namespace std;
 
 // Reads and returns valid coefficients from stdin.
-void readCoeffs(double, int); 
+void readCoeffs(double[], int); 
 
 // Calculates and returns the discriminant.
 double discr(double[], int);
 
 // If the discriminant is zero or greater, the roots are computed
 // and stored in global variables, then returns true.
-bool equSolver(double[], int);
+bool equSolver(double[], int, double[], int);
 
 // Appends real roots to the file. Otherwise prints a message
 // to stdout that no real roots exists.
-void outResults(double[], bool, ofstream&);
+void outResults(double[], int, double[], int, bool, ofstream&);
+
+
 
 int main(int argc, char* argv[]) {
   // local constants
@@ -46,6 +50,7 @@ int main(int argc, char* argv[]) {
   double roots[2];  // roots
   bool flag;  // if true then real roots exist
   int number = (argc > 1)?atoi(argv[1]):0;  // number of quadratic formulas to calculate
+  int coeffsCount = 3, rootsCount = 2;
   
   ofstream outStream;
   outStream.open(OUTPUT_FILE);  // if file exists, it is overwritten
@@ -53,13 +58,13 @@ int main(int argc, char* argv[]) {
   // Each iteration calculates one quadratic equation.
   for (int i=0; i < number; i++){
     // Operator enters values for the coefficients.
-    readCoeffs(coeffs);
+    readCoeffs(coeffs, coeffsCount);
     
     // Determines if there are real roots. If so calculates the roots. 
-    flag = equSolver(a, b, c);
+    flag = equSolver(coeffs, coeffsCount, roots, rootsCount);
     
     // Directs output to either the file or stdout respectively, based on flag.
-    outResults(a, b, c, flag, outStream);
+    outResults(coeffs, coeffsCount, roots, rootsCount, flag, outStream);
   }
   outStream.close();
   return 0;
@@ -67,7 +72,8 @@ int main(int argc, char* argv[]) {
 
 // Operator inputs coefficients.  If zero is entered for coeffiecient a, an
 // error message is displayed requesting a new entry.
-void readCoeffs(double& coeffs){
+void readCoeffs(double coeffs, int coeffsSize){
+
   while (true){  // Runs ad-infinitum until break condition is met.
     cout << "\nEnter coefficient a: "; 
     cin >> *coeffs;
@@ -85,24 +91,24 @@ void readCoeffs(double& coeffs){
 }
 
 // Computes and returns the discriminant.
-double discr(double a, double b, double c){
-  return (b*b-4*a*c);
+double discr(double coeffs[], int coeffsSize){
+  return (coeffs[1]*coeffs[1]-4*coeffs[0]*coeffs[2]);
 }
 
 // Gets the discriminant and if it's greater than or equal to 0 
 // computes the roots and returns true.
-bool equSolver(double a, double b, double c){
-  double compDisc = discr(a, b, c);
+bool equSolver(double coeffs[], int coeffsSize, double roots[], int rootsSize){
+  double compDisc = discr(coeffs, coeffsSize);
   
   if (compDisc >= 0){
-    root1 = (-b + sqrt(compDisc))/(2*a);
-    root2 = (-b - sqrt(compDisc))/(2*a);
+    roots[0] = (-coeffs[1] + sqrt(compDisc))/(2*coeffs[0]);
+    roots[1] = (-coeffs[1] - sqrt(compDisc))/(2*coeffs[0]);
   }
   
   return (compDisc >= 0)?true:false; // If roots exists true is returned.
 }
 
-void outResults(double a, double b, double c, bool rootsExist, ofstream& outStream){
+void outResults(double coeffs[], int coeffsSize, bool rootsExist, ofstream& outStream){
   if (rootsExist){
     // Results are appended to the opened file.
     outStream << "Quadratic equation with the following coefficients:";
