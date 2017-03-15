@@ -44,13 +44,15 @@ void outResults(double[], int, double[], int, bool, ofstream&);
 int main(int argc, char* argv[]) {
   // local constants
   const char* OUTPUT_FILE = "results.dat";
+  const int coeffsCount = 3;
+  const int rootsCount = 2;
 
   // local variables
-  double coeffs[3];  // coefficients
-  double roots[2];  // roots
+  double coeffs[coeffsCount];  // coefficients
+  double roots[rootsCount];
   bool flag;  // if true then real roots exist
   int number = (argc > 1)?atoi(argv[1]):0;  // number of quadratic formulas to calculate
-  int coeffsCount = 3, rootsCount = 2;
+  
   
   ofstream outStream;
   outStream.open(OUTPUT_FILE);  // if file exists, it is overwritten
