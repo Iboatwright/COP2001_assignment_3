@@ -14,13 +14,12 @@
    message is printed to stdout. 
  ***************************************************************************/
 
-//TODO 1: update functions to use arrays.
-//TODO 2: validate inputs (no idea why bothering in C++): http://www.cplusplus.com/forum/beginner/13044/#msg62827
-/*TODO 3: want to use pointers to handle arrays in functions
-    >> This should work just with how an array decays to a pointer,
-       but shouldnt be used since it creates a multi-purpose variable.
-       Instead I can create the pointer in the loop initilization?
-    >> If a struct is used I'll need to add a pointer.  
+/*TODO 1: update functions to use arrays.
+  TODO 2: validate inputs: http://www.cplusplus.com/forum/beginner/13044/#msg62827
+          Can either use template gist or notebook loop tests.
+  TODO 3: 
+
+
  */
  
 #include <iostream>
@@ -28,44 +27,56 @@
 #include <fstream>
 #include <stdlib.h>
 
-using namespace std;
+using namespace std; // TODO: remove this and update to use std::
+
+
+struct equation_t {
+  int coeffsCount = 3;  // Override Counts for other degree polynomials
+  int rootsCount = 2;  
+  double* coeffs;  // pointer to coefficient array
+  double* roots;  // pointer to roots array
+  bool flag;  // if true then real roots exist
+};
+
+// Creates arrays for coeffs and roots.
+void equation_init(equation_t&);
 
 // Reads and returns valid coefficients from stdin.
-void readCoeffs(double[], int); 
+void readCoeffs(equations_t&); 
 
 // Calculates and returns the discriminant.
-double discr(double[], int);
+double discr(equations_t&);
 
 // If the discriminant is zero or greater, the roots are computed
 // and stored in global variables, then returns true.
-bool equSolver(double[], int, double[], int);
+bool equSolver(equations_t&);
 
 // Appends real roots to the file. Otherwise prints a message
 // to stdout that no real roots exists.
-void outResults(double[], int, double[], int, bool, ofstream&);
+void outResults(equations_t&, ofstream&);
 
 
 
 int main(int argc, char* argv[]) {
   // local constants
   constexpr char* OUTPUT_FILE = "results.dat";
-  constexpr int coeffsCount = 3;
-  constexpr int rootsCount = 2;
 
   // local variables
-  double coeffs[coeffsCount];  // coefficients
-  double roots[rootsCount];
-  bool flag;  // if true then real roots exist
   int number = (argc > 1)?atoi(argv[1]):0;  // number of quadratic formulas to calculate
   
+  // struct array to hold all the equations calculated
+  equations_t quadratic[number];
   
   ofstream outStream;
   outStream.open(OUTPUT_FILE);  // if file exists, it is overwritten
   
   // Each iteration calculates one quadratic equation.
   for (int i=0; i < number; i++){
+    // initialize this quadratic equation
+    equation_init(quadratic[i]);
+    
     // Operator enters values for the coefficients.
-    readCoeffs(coeffs, coeffsCount);
+    readCoeffs(quadratic[i]);
     
     // Determines if there are real roots. If so calculates the roots. 
     flag = equSolver(coeffs, coeffsCount, roots, rootsCount);
@@ -75,6 +86,15 @@ int main(int argc, char* argv[]) {
   }
   outStream.close();
   return 0;
+}
+
+// Assigns address of new arrays to coeffs and roots pointers
+void equation_init(equation_t& eq){
+  // These arrays are allocated from the heap and exist until deleted.
+  // Next version I plan to handle that with a class destructor.
+  eq.coeffs = new double[eq.coeffsCount];  
+  eq.roots = new double[eq.rootsCount];
+  return;
 }
 
 // Operator inputs coefficients.  If zero is entered for coeffiecient a, an
