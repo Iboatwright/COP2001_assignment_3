@@ -16,7 +16,12 @@
 
 //TODO 1: update functions to use arrays.
 //TODO 2: validate inputs (no idea why bothering in C++): http://www.cplusplus.com/forum/beginner/13044/#msg62827
-//TODO 3: want to use pointers to handle arrays in functions
+/*TODO 3: want to use pointers to handle arrays in functions
+    >> This should work just with how an array decays to a pointer,
+       but shouldnt be used since it creates a multi-purpose variable.
+       Instead I can create the pointer in the loop initilization?
+    >> If a struct is used I'll need to add a pointer.  
+ */
  
 #include <iostream>
 #include <cmath>
@@ -43,9 +48,9 @@ void outResults(double[], int, double[], int, bool, ofstream&);
 
 int main(int argc, char* argv[]) {
   // local constants
-  const char* OUTPUT_FILE = "results.dat";
-  const int coeffsCount = 3;
-  const int rootsCount = 2;
+  constexpr char* OUTPUT_FILE = "results.dat";
+  constexpr int coeffsCount = 3;
+  constexpr int rootsCount = 2;
 
   // local variables
   double coeffs[coeffsCount];  // coefficients
