@@ -29,13 +29,13 @@
 
 using namespace std; // TODO: remove this and update to use std::
 
-
+// defaults to a quadratic 
 struct equation_t {
   int coeffsCount = 3;  // Override Counts for other degree polynomials
   int rootsCount = 2;  
   double* coeffs;  // pointer to coefficient array
   double* roots;  // pointer to roots array
-  bool flag;  // if true then real roots exist
+  bool rootsExist = false;  // if true then real roots exist
 };
 
 // Creates arrays for coeffs and roots.
@@ -103,11 +103,11 @@ void equation_init(equation_t& eq){
 
 // Operator inputs coefficients.  If zero is entered for coeffiecient a, an
 // error message is displayed requesting a new entry.
-void readCoeffs(double coeffs, int coeffsSize){
+void readCoeffs(equation_t& eq){
 
   while (true){  // Runs ad-infinitum until break condition is met.
     std::std::cout << "\nEnter coefficient a: "; 
-    std::cin >> *coeffs;
+    std::cin >> *eq.coeffs;
     if (*coeffs) break;  // a must not equal zero 
     else {  // operator entered zero for coefficient a
       std::cout << "\nInvalid entry. Please enter a non-zero "\
