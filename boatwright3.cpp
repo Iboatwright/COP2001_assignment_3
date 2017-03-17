@@ -55,6 +55,9 @@ bool equSolver(equations_t&);
 // to stdout that no real roots exists.
 void outResults(equations_t&, ofstream&);
 
+// equation_cleanup frees memory resourses before program exits
+void equation_cleanup(equations_t&, int);
+
 
 
 int main(int argc, char* argv[]) {
@@ -79,12 +82,13 @@ int main(int argc, char* argv[]) {
     readCoeffs(quadratic[i]);
     
     // Determines if there are real roots. If so calculates the roots. 
-    flag = equSolver(coeffs, coeffsCount, roots, rootsCount);
+    equSolver(quadratic[i]);
     
     // Directs output to either the file or stdout respectively, based on flag.
-    outResults(coeffs, coeffsCount, roots, rootsCount, flag, outStream);
+    outResults(quadratic[i], outStream);
   }
-  outStream.close();
+  outStream.close
+  equation_cleanup(quadratic, number)
   return 0;
 }
 
@@ -148,4 +152,17 @@ void outResults(double coeffs[], int coeffsSize, bool rootsExist, ofstream& outS
     std::cout << "has no roots in the real domain." << std::endl << std::endl;
   }
   return;
+}
+
+void equation_cleanup(equations_t& eq, int number){
+  for (int i=0; i<number;i++){
+    
+    // I don't know if I have to dereference these for this to work
+    delete eq[i].coeffs; 
+    delete eq[i].roots;
+    
+    // not really needed but good practice i think
+    eq[i].coeffs = nullptr;
+    eq[i].roots = nullptr;
+  }
 }
