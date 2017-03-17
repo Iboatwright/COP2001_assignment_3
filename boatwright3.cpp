@@ -102,18 +102,18 @@ void equation_init(equation_t& eq){
 void readCoeffs(double coeffs, int coeffsSize){
 
   while (true){  // Runs ad-infinitum until break condition is met.
-    cout << "\nEnter coefficient a: "; 
-    cin >> *coeffs;
+    std::std::cout << "\nEnter coefficient a: "; 
+    std::cin >> *coeffs;
     if (*coeffs) break;  // a must not equal zero 
     else {  // operator entered zero for coefficient a
-      cout << "\nInvalid entry. Please enter a non-zero "\
-           "value for a." << endl;
+      std::cout << "\nInvalid entry. Please enter a non-zero "\
+           "value for a." << std::endl;
     }
   }
-  cout << "\nEnter coefficient b: "; 
-  cin >> *++coeffs;
-  cout << "\nEnter coefficient c: "; 
-  cin >> *++coeffs;
+  std::cout << "\nEnter coefficient b: "; 
+  std::cin >> *++coeffs;
+  std::cout << "\nEnter coefficient c: "; 
+  std::cin >> *++coeffs;
   return; 
 }
 
@@ -139,13 +139,13 @@ void outResults(double coeffs[], int coeffsSize, bool rootsExist, ofstream& outS
   if (rootsExist){
     // Results are appended to the opened file.
     outStream << "Quadratic equation with the following coefficients:";
-    outStream << endl << "a: " << a << "; b: " << b << "; c: " << c << endl;
-    outStream << "has the following roots" << endl << "Root1: " << root1 ;
-    outStream << "; Root2: " << root2 << ";" << endl << endl;
+    outStream << std::endl << "a: " << a << "; b: " << b << "; c: " << c << std::endl;
+    outStream << "has the following roots" << std::endl << "Root1: " << root1 ;
+    outStream << "; Root2: " << root2 << ";" << std::endl << std::endl;
   } else {
-    cout << "Quadratic equation with the following coefficients:" << endl;
-    cout << "a: " << a << "; b: " << b << "; c: " << c << endl;
-    cout << "has no roots in the real domain." << endl << endl;
+    std::cout << "Quadratic equation with the following coefficients:" << std::endl;
+    std::cout << "a: " << a << "; b: " << b << "; c: " << c << std::endl;
+    std::cout << "has no roots in the real domain." << std::endl << std::endl;
   }
   return;
 }
