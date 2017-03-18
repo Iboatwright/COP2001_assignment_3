@@ -14,7 +14,7 @@
    message is printed to stdout. 
  ***************************************************************************/
 
-/*TODO 1: update functions to use arrays.
+/*TODO 1: test array functionality
   TODO 2: validate inputs: http://www.cplusplus.com/forum/beginner/13044/#msg62827
           Can either use template gist or notebook loop tests.
   TODO 3: 
@@ -27,8 +27,6 @@
 #include <fstream>
 #include <stdlib.h>
 
-using namespace std; // TODO: remove this and update to use std::
-
 // defaults to a quadratic 
 struct equation_t {
   int coeffsCount = 3;  // Override Counts for other degree polynomials
@@ -38,26 +36,25 @@ struct equation_t {
   bool rootsExist = false;  // if true then real roots exist
 };
 
-// Creates arrays for coeffs and roots.
+// Creates new[] equation arrays for coeffs and roots.
 void equation_init(equation_t&);
 
 // Reads and returns valid coefficients from stdin.
 void readCoeffs(equations_t&); 
 
 // Calculates and returns the discriminant.
-double discr(equations_t&);
+double discr(double*);
 
-// If the discriminant is zero or greater, the roots are computed
-// and stored in global variables, then returns true.
-bool equSolver(equations_t&);
+// If the discriminant is zero or greater, the roots are computed,
+// stored in the equation object, and rootsExist is set to true.
+void equSolver(equations_t&);
 
 // Appends real roots to the file. Otherwise prints a message
 // to stdout that no real roots exists.
-void outResults(equations_t&, ofstream&);
+void outResults(equations_t&, std::ofstream&);
 
-// equation_cleanup frees memory resourses before program exits
+// equation_cleanup releases memory resourses before program exits
 void equation_cleanup(equations_t&, int);
-
 
 
 int main(int argc, char* argv[]) {
@@ -65,12 +62,12 @@ int main(int argc, char* argv[]) {
   constexpr char* OUTPUT_FILE = "results.dat";
 
   // local variables
-  int number = (argc > 1)?atoi(argv[1]):0;  // number of quadratic formulas to calculate
+  int number = (argc > 1)?std::atoi(argv[1]):0;  // number of quadratic formulas to calculate
   
   // struct array to hold all the equations calculated
   equations_t quadratic[number];
   
-  ofstream outStream;
+  std::ofstream outStream;
   outStream.open(OUTPUT_FILE);  // if file exists, it is overwritten
   
   // Each iteration calculates one quadratic equation.
@@ -84,7 +81,7 @@ int main(int argc, char* argv[]) {
     // Determines if there are real roots. If so calculates the roots. 
     equSolver(quadratic[i]);
     
-    // Directs output to either the file or stdout respectively, based on flag.
+    // Directs output to either the file or stdout respectively, based on rootsExist.
     outResults(quadratic[i], outStream);
   }
   outStream.close
@@ -106,49 +103,50 @@ void equation_init(equation_t& eq){
 void readCoeffs(equation_t& eq){
 
   while (true){  // Runs ad-infinitum until break condition is met.
-    std::std::cout << "\nEnter coefficient a: "; 
+    std::cout << "\nEnter coefficient a: "; 
     std::cin >> *eq.coeffs;
-    if (*coeffs) break;  // a must not equal zero 
+    if (*eq.coeffs) break;  // a must not equal zero 
     else {  // operator entered zero for coefficient a
       std::cout << "\nInvalid entry. Please enter a non-zero "\
            "value for a." << std::endl;
     }
   }
   std::cout << "\nEnter coefficient b: "; 
-  std::cin >> *++coeffs;
+  std::cin >> *(eq.coeffs + 1);
   std::cout << "\nEnter coefficient c: "; 
-  std::cin >> *++coeffs;
+  std::cin >> *(eq.coeffs + 2);
   return; 
 }
 
 // Computes and returns the discriminant.
-double discr(double coeffs[], int coeffsSize){
+double discr(double* coeffs){
   return (coeffs[1]*coeffs[1]-4*coeffs[0]*coeffs[2]);
 }
 
 // Gets the discriminant and if it's greater than or equal to 0 
 // computes the roots and returns true.
-bool equSolver(double coeffs[], int coeffsSize, double roots[], int rootsSize){
-  double compDisc = discr(coeffs, coeffsSize);
+void equSolver(equation_t& eq){
+  double discriminant = discr(eq.coeffs);
   
-  if (compDisc >= 0){
-    roots[0] = (-coeffs[1] + sqrt(compDisc))/(2*coeffs[0]);
-    roots[1] = (-coeffs[1] - sqrt(compDisc))/(2*coeffs[0]);
+  if (discriminant >= 0){
+    eq.roots[0] = (-eq.coeffs[1] + sqrt(discriminant))/(2*eq.coeffs[0]);
+    eq.roots[1] = (-eq.coeffs[1] - sqrt(discriminant))/(2*eq.coeffs[0]);
   }
-  
-  return (compDisc >= 0)?true:false; // If roots exists true is returned.
+ 
+  eq.rootsExist = (discriminant >= 0)?true:false;
+  return; 
 }
 
-void outResults(double coeffs[], int coeffsSize, bool rootsExist, ofstream& outStream){
-  if (rootsExist){
+void outResults(equation_t& eq, std::ofstream& outStream){
+  if (eq.rootsExist){
     // Results are appended to the opened file.
     outStream << "Quadratic equation with the following coefficients:";
-    outStream << std::endl << "a: " << a << "; b: " << b << "; c: " << c << std::endl;
-    outStream << "has the following roots" << std::endl << "Root1: " << root1 ;
-    outStream << "; Root2: " << root2 << ";" << std::endl << std::endl;
+    outStream << std::endl << "a: " << eq.coeffs[0] << "; b: " << eq.coeffs[0] << "; c: " << eq.coeffs[0] << std::endl;
+    outStream << "has the following roots" << std::endl << "Root1: " << eq.roots[0] ;
+    outStream << "; Root2: " << eq.roots[1] << ";" << std::endl << std::endl;
   } else {
     std::cout << "Quadratic equation with the following coefficients:" << std::endl;
-    std::cout << "a: " << a << "; b: " << b << "; c: " << c << std::endl;
+    std::cout << "a: " <<eq.coeffs[0] << "; b: " << eq.coeffs[0] << "; c: " << eq.coeffs[0] << std::endl;
     std::cout << "has no roots in the real domain." << std::endl << std::endl;
   }
   return;
