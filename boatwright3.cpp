@@ -14,12 +14,9 @@
    message is printed to stdout. 
  ***************************************************************************/
 
-/*TODO 1: test array functionality
-  TODO 2: validate inputs: http://www.cplusplus.com/forum/beginner/13044/#msg62827
-          Can either use template gist or notebook loop tests.
-  TODO 3: 
-
-
+/*TODO 1:  validate inputs. Can either use template gist or notebook loop tests.
+  :: http://www.cplusplus.com/forum/beginner/13044/#msg62827
+   TODO 2:  revise comments based on my google doc's guidelines
  */
  
 #include <iostream>
@@ -54,7 +51,7 @@ void equSolver(equation_t&);
 void outResults(equation_t&, std::ofstream&);
 
 // equation_cleanup releases memory resourses before program exits
-void equation_cleanup(auto&&, int);
+void resource_cleanup(equation_t*, int);
 
 
 int main(int argc, char* argv[]) {
@@ -62,7 +59,7 @@ int main(int argc, char* argv[]) {
   const char* OUTPUT_FILE = "results.dat";
 
   // local variables
-  int number = (argc > 1)?std::atoi(argv[1]):0;  // number of quadratic formulas to calculate
+  int number = (argc > 1)?std::atoi(argv[1]):0;  // number of equations to calculate
   
   // struct array to hold all the equations calculated
   equation_t quadratic[number];
@@ -85,7 +82,9 @@ int main(int argc, char* argv[]) {
     outResults(quadratic[i], outStream);
   }
   outStream.close();
-  equation_cleanup(&quadratic, number);
+  resource_cleanup(quadratic, number);
+  std::cout << "( " << number << " ) equation" << ((number == 1)?" ":"s ")
+                  << "calculated. Have a nice day!" << std::endl;
   return 0;
 }
 
@@ -140,27 +139,29 @@ void equSolver(equation_t& eq){
 void outResults(equation_t& eq, std::ofstream& outStream){
   if (eq.rootsExist){
     // Results are appended to the opened file.
-    outStream << "Quadratic equation with the following coefficients:";
-    outStream << std::endl << "a: " << eq.coeffs[0] << "; b: " << eq.coeffs[0] << "; c: " << eq.coeffs[0] << std::endl;
-    outStream << "has the following roots" << std::endl << "Root1: " << eq.roots[0] ;
-    outStream << "; Root2: " << eq.roots[1] << ";" << std::endl << std::endl;
+    outStream << "Quadratic equation with the following coefficients:"
+                        << std::endl << "a: " << eq.coeffs[0] << "; b: " << eq.coeffs[1] 
+                        << "; c: " << eq.coeffs[2] << std::endl
+                        << "has the following roots" << std::endl << "Root1: " << eq.roots[0] 
+                        << "; Root2: " << eq.roots[1] << ";" << std::endl << std::endl;
   } else {
-    std::cout << "Quadratic equation with the following coefficients:" << std::endl;
-    std::cout << "a: " <<eq.coeffs[0] << "; b: " << eq.coeffs[0] << "; c: " << eq.coeffs[0] << std::endl;
-    std::cout << "has no roots in the real domain." << std::endl << std::endl;
+    std::cout << std::endl << "Quadratic equation with the following coefficients:" 
+                    << std::endl << "a: " <<eq.coeffs[0] << "; b: " << eq.coeffs[1] << "; c: " 
+                   << eq.coeffs[2]  << std::endl << "has no roots in the real domain." 
+                    << std::endl << std::endl;
   }
   return;
 }
 
-void equation_cleanup(auto&& eq, int number){
+// comments needed?
+void resource_cleanup(equation_t* eq, int number){
   for (int i=0; i<number;i++){
     
-    // I don't know if I have to dereference these for this to work
-    delete [] eq[i].coeffs; 
-    delete [] eq[i].roots;
+    delete[] (eq+i)->coeffs; 
+    delete[] (eq+i)->roots;
     
     // not really needed but good practice i think
-    eq[i].coeffs = nullptr;
-    eq[i].roots = nullptr;
+    (eq+i)->coeffs = nullptr;
+    (eq+i)->roots = nullptr;
   }
 }
