@@ -40,32 +40,32 @@ struct equation_t {
 void equation_init(equation_t&);
 
 // Reads and returns valid coefficients from stdin.
-void readCoeffs(equations_t&); 
+void readCoeffs(equation_t&); 
 
 // Calculates and returns the discriminant.
 double discr(double*);
 
 // If the discriminant is zero or greater, the roots are computed,
 // stored in the equation object, and rootsExist is set to true.
-void equSolver(equations_t&);
+void equSolver(equation_t&);
 
 // Appends real roots to the file. Otherwise prints a message
 // to stdout that no real roots exists.
-void outResults(equations_t&, std::ofstream&);
+void outResults(equation_t&, std::ofstream&);
 
 // equation_cleanup releases memory resourses before program exits
-void equation_cleanup(equations_t&, int);
+void equation_cleanup(auto&&, int);
 
 
 int main(int argc, char* argv[]) {
   // local constants
-  constexpr char* OUTPUT_FILE = "results.dat";
+  const char* OUTPUT_FILE = "results.dat";
 
   // local variables
   int number = (argc > 1)?std::atoi(argv[1]):0;  // number of quadratic formulas to calculate
   
   // struct array to hold all the equations calculated
-  equations_t quadratic[number];
+  equation_t quadratic[number];
   
   std::ofstream outStream;
   outStream.open(OUTPUT_FILE);  // if file exists, it is overwritten
@@ -84,8 +84,8 @@ int main(int argc, char* argv[]) {
     // Directs output to either the file or stdout respectively, based on rootsExist.
     outResults(quadratic[i], outStream);
   }
-  outStream.close
-  equation_cleanup(quadratic, number)
+  outStream.close();
+  equation_cleanup(&quadratic, number);
   return 0;
 }
 
@@ -152,12 +152,12 @@ void outResults(equation_t& eq, std::ofstream& outStream){
   return;
 }
 
-void equation_cleanup(equations_t& eq, int number){
+void equation_cleanup(auto&& eq, int number){
   for (int i=0; i<number;i++){
     
     // I don't know if I have to dereference these for this to work
-    delete eq[i].coeffs; 
-    delete eq[i].roots;
+    delete [] eq[i].coeffs; 
+    delete [] eq[i].roots;
     
     // not really needed but good practice i think
     eq[i].coeffs = nullptr;
