@@ -23,16 +23,20 @@
 #include <cmath>
 #include <fstream>
 #include <stdlib.h>
+// https://isocpp.org/wiki/faq/templates
 //----------------------------------------------------------------------------
-template <typename T>
+// This is the type definition for an input_t type
+template <typename T> 
 struct input_t
   {
-  mutable T& n;
-  explicit input_t( T& n ): n( n ) { }
+  mutable T& n; // input_t is called as a const. mutable member of a const object isn't const.
+  // constructor: implicit type conversion is not allowed
+  explicit input_t( T& n ): n( n ) { } 
   input_t( const input_t <T> & i ): n( i.n ) { }
   };
 
 //----------------------------------------------------------------------------
+// This is the function definition 
 template <typename T>
 inline
 input_t <T>
@@ -43,7 +47,8 @@ input( T& n )
   }
 
 //----------------------------------------------------------------------------
-template <typename T>
+// we're overriding the istream >> operator to perform input validation
+template <typename T> // i is a struct of type input_t which is cast with type T
 istream& operator >> ( istream& ins, const input_t <T> & i )
   {
   // Read a line (terminated by ENTER|NEWLINE) from the user
@@ -54,11 +59,12 @@ istream& operator >> ( istream& ins, const input_t <T> & i )
   s.erase( s.find_last_not_of( " \f\n\r\t\v" ) + 1 );
 
   // Read it into the target type
-  istringstream ss( s );
+  istringstream ss( s ); // istringstream constructor passed the string variable
   ss >> i.n;
 
   // Check to see that there is nothing left over
   if (!ss.eof())
+    // something was left over.
     ins.setstate( ios::failbit );
 
   return ins;
@@ -124,8 +130,13 @@ int main(int argc, char* argv[]) {
   }
   outStream.close();
   resource_cleanup(quadratic, number);
-  std::cout << "( " << number << " ) equation" << ((number == 1)?" ":"s ")
+  if (number > 1){
+    std::cout << "( " << number << " ) equation" << ((number == 1)?" ":"s ")
                   << "calculated. Have a nice day!" << std::endl;
+  } else {
+    std::cout << "Invalid commandline argument. Please enter a positive" _
+                 "integer for the number of equations to calculate." << endl;
+  }
   return 0;
 }
 
