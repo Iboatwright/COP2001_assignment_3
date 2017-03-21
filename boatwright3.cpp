@@ -23,7 +23,48 @@
 #include <cmath>
 #include <fstream>
 #include <stdlib.h>
+//----------------------------------------------------------------------------
+template <typename T>
+struct input_t
+  {
+  mutable T& n;
+  explicit input_t( T& n ): n( n ) { }
+  input_t( const input_t <T> & i ): n( i.n ) { }
+  };
 
+//----------------------------------------------------------------------------
+template <typename T>
+inline
+input_t <T>
+input( T& n )
+  {
+  input_t <T> result( n );
+  return result;
+  }
+
+//----------------------------------------------------------------------------
+template <typename T>
+istream& operator >> ( istream& ins, const input_t <T> & i )
+  {
+  // Read a line (terminated by ENTER|NEWLINE) from the user
+  string s;
+  getline( ins, s );
+
+  // Get rid of any trailing whitespace
+  s.erase( s.find_last_not_of( " \f\n\r\t\v" ) + 1 );
+
+  // Read it into the target type
+  istringstream ss( s );
+  ss >> i.n;
+
+  // Check to see that there is nothing left over
+  if (!ss.eof())
+    ins.setstate( ios::failbit );
+
+  return ins;
+  }
+
+//----------------------------------------------------------------------------
 // defaults to a quadratic 
 struct equation_t {
   int coeffsCount = 3;  // Override Counts for other degree polynomials
