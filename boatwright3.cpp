@@ -32,7 +32,7 @@
 template <typename Tom> 
 struct input_t
   {
-  mutable Tom& n; // input_t is called as a const. mutable member of a const object isn't const.
+  Tom& n; // input_t can modify by reference
   // constructor: implicit type conversion is not allowed
   explicit input_t( Tom& n ): n( n ) { } 
   input_t( const input_t <Tom> & i ): n( i.n ) { }
@@ -53,27 +53,27 @@ input( Tim& n )
 
 //----------------------------------------------------------------------------
 // we're overriding the istream >> operator to perform input validation
-// lvalue is the istream object (cin), rvalue is an input_t type object initialized with 
-//   the user input.
+// lvalue is the istream object (cin), rvalue is an input_t type object 
+//   initialized with the user input.
 // i is a struct of type input_t which is cast with type T
 template <typename Tad> 
-istream& operator >> ( istream& ins, const input_t <Tad> & i )
+std::istream& operator >> ( std::istream& ins, const input_t <Tad> & i )
   {
   // Read a line (terminated by ENTER|NEWLINE) from the user
   std::string s;
-  getline( ins, s );
+  std::getline( ins, s );
 
   // Get rid of any trailing whitespace
   s.erase( s.find_last_not_of( " \f\n\r\t\v" ) + 1 );
 
   // Read it into the target type
-  istringstream ss( s ); // istringstream constructor passed the string variable
+  std::istringstream ss( s ); // constructor passed the string variable
   ss >> i.n;
 
   // Check to see that there is nothing left over
   if (!ss.eof())
     // something was left over.
-    ins.setstate( ios::failbit );
+    ins.setstate( std::ios::failbit );
 
   return ins;
   }
@@ -87,6 +87,9 @@ struct equation_t {
   double* roots;  // pointer to roots array
   bool rootsExist = false;  // if true then real roots exist
 };
+
+// requests user to enter doubles
+void coeffInput(double&, char);
 
 // Creates new[] equation arrays for coeffs and roots.
 void equation_init(equation_t&);
@@ -113,8 +116,8 @@ int main(int argc, char* argv[]) {
   // local constants
   const char* OUTPUT_FILE = "results.dat";
 
-  // local variables
-  int number = (argc > 1)?std::atoi(argv[1]):0;  // number of equations to calculate
+  // number of equations to calculate
+  int number = std::abs((argc > 1)?std::atoi(argv[1]):0);  
   
   // struct array to hold all the equations calculated
   equation_t quadratic[number];
@@ -133,7 +136,7 @@ int main(int argc, char* argv[]) {
     // Determines if there are real roots. If so calculates the roots. 
     equSolver(quadratic[i]);
     
-    // Directs output to either the file or stdout respectively, based on rootsExist.
+    // Directs output to the file or stdout respectively, based on rootsExist.
     outResults(quadratic[i], outStream);
   }
   outStream.close();
@@ -142,8 +145,8 @@ int main(int argc, char* argv[]) {
     std::cout << "( " << number << " ) equation" << ((number == 1)?" ":"s ")
                   << "calculated. Have a nice day!" << std::endl;
   } else {
-    std::cout << "Invalid commandline argument. Please enter a positive" _
-                 "integer for the number of equations to calculate." << endl;
+    std::cout << "Invalid commandline argument. Please enter a positive "\
+               "integer for the number of equations to calculate." << std::endl;
   }
   return 0;
 }
@@ -157,23 +160,34 @@ void equation_init(equation_t& eq){
   return;
 }
 
+void coeffInput(double& d, char c){
+  std::cout << "\nEnter coefficient " << c << ": ";
+  std::cin >> d;
+  while (!std::cin){
+    std::cin.clear();
+    std::cout << "Error! Please enter a valid number for the coefficient.\n";
+    std::cout << "\nEnter coefficient " << c << ": ";
+    std::cin >> d;
+  }
+  
+}
+
 // Operator inputs coefficients.  If zero is entered for coeffiecient a, an
 // error message is displayed requesting a new entry.
 void readCoeffs(equation_t& eq){
 
   while (true){  // Runs ad-infinitum until break condition is met.
-    std::cout << "\nEnter coefficient a: "; 
-    std::cin >> *eq.coeffs;
+     
+    coeffInput(*eq.coeffs, 'a');
     if (*eq.coeffs) break;  // a must not equal zero 
     else {  // operator entered zero for coefficient a
       std::cout << "\nInvalid entry. Please enter a non-zero "\
            "value for a." << std::endl;
+      coeffInput(*eq.coeffs, 'a');
     }
   }
-  std::cout << "\nEnter coefficient b: "; 
-  std::cin >> *(eq.coeffs + 1);
-  std::cout << "\nEnter coefficient c: "; 
-  std::cin >> *(eq.coeffs + 2);
+  coeffInput(*(eq.coeffs + 1), 'b');
+  coeffInput(*(eq.coeffs + 2), 'c');
   return; 
 }
 
@@ -200,15 +214,16 @@ void outResults(equation_t& eq, std::ofstream& outStream){
   if (eq.rootsExist){
     // Results are appended to the opened file.
     outStream << "Quadratic equation with the following coefficients:"
-                        << std::endl << "a: " << eq.coeffs[0] << "; b: " << eq.coeffs[1] 
-                        << "; c: " << eq.coeffs[2] << std::endl
-                        << "has the following roots" << std::endl << "Root1: " << eq.roots[0] 
-                        << "; Root2: " << eq.roots[1] << ";" << std::endl << std::endl;
+              << std::endl << "a: " << eq.coeffs[0] << "; b: " << eq.coeffs[1] 
+              << "; c: " << eq.coeffs[2] << std::endl
+              << "has the following roots" << std::endl << "Root1: " 
+              << eq.roots[0] << "; Root2: " << eq.roots[1] << ";" << std::endl 
+              << std::endl;
   } else {
     std::cout << std::endl << "Quadratic equation with the following coefficients:" 
-                    << std::endl << "a: " <<eq.coeffs[0] << "; b: " << eq.coeffs[1] << "; c: " 
-                   << eq.coeffs[2]  << std::endl << "has no roots in the real domain." 
-                    << std::endl << std::endl;
+              << std::endl << "a: " <<eq.coeffs[0] << "; b: " << eq.coeffs[1]  
+              << "; c: " << eq.coeffs[2]  << std::endl  
+              << "has no roots in the real domain." << std::endl << std::endl;
   }
   return;
 }
