@@ -20,39 +20,47 @@
  */
  
 #include <iostream>
-#include <cmath>
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <cmath>
 #include <stdlib.h>
+
 // https://isocpp.org/wiki/faq/templates
 //----------------------------------------------------------------------------
 // This is the type definition for an input_t type
-template <typename T> 
+template <typename Tom> 
 struct input_t
   {
-  mutable T& n; // input_t is called as a const. mutable member of a const object isn't const.
+  mutable Tom& n; // input_t is called as a const. mutable member of a const object isn't const.
   // constructor: implicit type conversion is not allowed
-  explicit input_t( T& n ): n( n ) { } 
-  input_t( const input_t <T> & i ): n( i.n ) { }
+  explicit input_t( Tom& n ): n( n ) { } 
+  input_t( const input_t <Tom> & i ): n( i.n ) { }
   };
 
 //----------------------------------------------------------------------------
-// This is the function definition 
-template <typename T>
+// inline is a compiler directive that looks for every instance of input(T& x) and 
+//  replace it with the code: input_t <T> result(x); return result;
+//  **I think this might be equivalent to a lambda expression**
+template <typename Tim>
 inline
-input_t <T>
-input( T& n )
+input_t <Tim>
+input( Tim& n )
   {
-  input_t <T> result( n );
+  input_t <Tim> result( n );
   return result;
   }
 
 //----------------------------------------------------------------------------
 // we're overriding the istream >> operator to perform input validation
-template <typename T> // i is a struct of type input_t which is cast with type T
-istream& operator >> ( istream& ins, const input_t <T> & i )
+// lvalue is the istream object (cin), rvalue is an input_t type object initialized with 
+//   the user input.
+// i is a struct of type input_t which is cast with type T
+template <typename Tad> 
+istream& operator >> ( istream& ins, const input_t <Tad> & i )
   {
   // Read a line (terminated by ENTER|NEWLINE) from the user
-  string s;
+  std::string s;
   getline( ins, s );
 
   // Get rid of any trailing whitespace
