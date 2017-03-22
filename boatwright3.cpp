@@ -33,6 +33,9 @@ struct equation_t {
   bool rootsExist = false;  // if true then real roots exist
 };
 
+// Requests user to input doubles
+void coeffInput(double&, char);
+
 // Creates new[] equation arrays for coeffs and roots.
 void equation_init(equation_t&);
 
@@ -58,8 +61,8 @@ int main(int argc, char* argv[]) {
   // local constants
   const char* OUTPUT_FILE = "results.dat";
 
-  // local variables
-  int number = (argc > 1)?std::atoi(argv[1]):0;  // number of equations to calculate
+  // number of equations to calculate
+  int number = std::abs((argc > 1)?std::atoi(argv[1]):0);
   
   // struct array to hold all the equations calculated
   equation_t quadratic[number];
@@ -78,13 +81,18 @@ int main(int argc, char* argv[]) {
     // Determines if there are real roots. If so calculates the roots. 
     equSolver(quadratic[i]);
     
-    // Directs output to either the file or stdout respectively, based on rootsExist.
+    // Directs output to the file or stdout respectively, based on rootsExist.
     outResults(quadratic[i], outStream);
   }
   outStream.close();
   resource_cleanup(quadratic, number);
-  std::cout << "( " << number << " ) equation" << ((number == 1)?" ":"s ")
-                  << "calculated. Have a nice day!" << std::endl;
+  if ( number > 1){
+    std::cout << "( " << number << " ) equation" << ((number == 1)?" ":"s ")
+                    << "calculated. Have a nice day!" << std::endl;
+  } else {
+    std::cout << "Invalid commandline argument. Please enter a positive "\
+                    "integer for the number of equations to calculate." << std::endl;
+  }
   return 0;
 }
 
@@ -97,23 +105,34 @@ void equation_init(equation_t& eq){
   return;
 }
 
+// input validation
+void coeffInput(double& d, char c){
+  std::cout << "\nEnter coefficient " << c << ": ";
+  std::cin >> d;
+  while (!std::cin){
+    std::cin.clear();
+    std::cout << "Error! Please enter a valid number for the coefficient.\n";
+    std::cout << "\n Enter coefficient " << c << ": ";
+    std::cin >> d;
+    }
+}
+
 // Operator inputs coefficients.  If zero is entered for coeffiecient a, an
 // error message is displayed requesting a new entry.
 void readCoeffs(equation_t& eq){
 
   while (true){  // Runs ad-infinitum until break condition is met.
-    std::cout << "\nEnter coefficient a: "; 
-    std::cin >> *eq.coeffs;
+    coeffInput(*eq.coeffs, 'a');
     if (*eq.coeffs) break;  // a must not equal zero 
     else {  // operator entered zero for coefficient a
       std::cout << "\nInvalid entry. Please enter a non-zero "\
            "value for a." << std::endl;
+      coeffInput(*eq.coeffs, 'a');
     }
   }
-  std::cout << "\nEnter coefficient b: "; 
-  std::cin >> *(eq.coeffs + 1);
-  std::cout << "\nEnter coefficient c: "; 
-  std::cin >> *(eq.coeffs + 2);
+
+  coeffInput(*(eq.coeffs + 1), 'b');
+  coeffInput(*(eq.coeffs + 2), 'c');
   return; 
 }
 
