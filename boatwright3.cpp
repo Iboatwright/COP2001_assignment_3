@@ -3,26 +3,30 @@
  title  : COP 2001 Assignment #3 - 2017
  author : Ivan Boatwright
  email  : ijboatwright5153@eagle.fgcu.edu
- version: 3.0 2/28/17
+ version: 3.3 3/22/17
  
    Solves quadratic equations of the form:
         a*x^2 + b*x + c = 0
    The number of equations to calculate is passed from the commandline.
+   Only a positive integer is accepted from the commandline. Otherwise the
+     program terminates early.
    The values for a, b, and c are entered by the operator when prompted.
-   If zero is entered for the 'a' variable an error message is displayed.
+    If zero is entered for the 'a' variable an error message is displayed.
+    If non-numeric values are entered for a, b, or c an error message is
+      displayed.
    If roots exist the results are printed to a file. If no roots exist a
    message is printed to stdout. 
  ***************************************************************************/
 
-/*TODO 1:  validate inputs. Can either use template gist or notebook loop tests.
-  :: http://www.cplusplus.com/forum/beginner/13044/#msg62827
-   TODO 2:  revise comments based on my google doc's guidelines
+/*TODO 1:  test against inputs.
+  TODO 2:  revise comments based on my google doc's guidelines
  */
  
 #include <iostream>
 #include <cmath>
 #include <fstream>
 #include <stdlib.h>
+#include <limits>
 
 // defaults to a quadratic 
 struct equation_t {
@@ -33,11 +37,14 @@ struct equation_t {
   bool rootsExist = false;  // if true then real roots exist
 };
 
-// Requests user to input doubles
-void coeffInput(double&, char);
+// commandline argument validation (must be a positive integer)
+int validateNumber(int, char*);
 
 // Creates new[] equation arrays for coeffs and roots.
 void equation_init(equation_t&);
+
+// Requests user to input the coefficients
+void coeffInput(double&, char);
 
 // Reads and returns valid coefficients from stdin.
 void readCoeffs(equation_t&); 
@@ -56,13 +63,12 @@ void outResults(equation_t&, std::ofstream&);
 // equation_cleanup releases memory resourses before program exits
 void resource_cleanup(equation_t*, int);
 
-
 int main(int argc, char* argv[]) {
   // local constants
   const char* OUTPUT_FILE = "results.dat";
 
   // number of equations to calculate
-  int number = std::abs((argc > 1)?std::atoi(argv[1]):0);
+  int number = validateNumber(argc, argv[1]);  
   
   // struct array to hold all the equations calculated
   equation_t quadratic[number];
@@ -84,16 +90,32 @@ int main(int argc, char* argv[]) {
     // Directs output to the file or stdout respectively, based on rootsExist.
     outResults(quadratic[i], outStream);
   }
+  
   outStream.close();
   resource_cleanup(quadratic, number);
   if ( number > 1){
     std::cout << "( " << number << " ) equation" << ((number == 1)?" ":"s ")
                     << "calculated. Have a nice day!" << std::endl;
-  } else {
-    std::cout << "Invalid commandline argument. Please enter a positive "\
-                    "integer for the number of equations to calculate." << std::endl;
-  }
+  } 
+  
   return 0;
+}
+
+// blah
+int validateNumber(int argc, char* argv1){
+  int number = (argc > 1)?std::atoi(argv1):0;
+  if (argc > 1 && !number) { // not a positive integer
+    std::cout << "Program terminated.\n" << argv1 << " is an invalid "\
+              "number of equations.\n Please enter a positive integer "\
+              "for the number of equations to calculate and run the program "\
+              "again." << std::endl;
+  } else if (argc == 1) {
+    std::cout << "Program terminated.\nCommandline argument missing.\n"\
+              "Please enter a positive integer for the number of equations"\
+              " to calculate and run the program again.\n" << std::endl;
+  }
+  
+  return number;
 }
 
 // Assigns address of new arrays to coeffs and roots pointers
@@ -105,16 +127,22 @@ void equation_init(equation_t& eq){
   return;
 }
 
-// input validation
+// User input is requested and validated
 void coeffInput(double& d, char c){
   std::cout << "\nEnter coefficient " << c << ": ";
   std::cin >> d;
+  
+  // the program wasn't able to assign the user input as a double
   while (!std::cin){
     std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
     std::cout << "Error! Please enter a valid number for the coefficient.\n";
-    std::cout << "\n Enter coefficient " << c << ": ";
+    std::cout << "\nEnter coefficient " << c << ": ";
     std::cin >> d;
     }
+
+  // clear the input buffer of everything after the double is assigned
+  std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
 }
 
 // Operator inputs coefficients.  If zero is entered for coeffiecient a, an
@@ -158,16 +186,17 @@ void equSolver(equation_t& eq){
 void outResults(equation_t& eq, std::ofstream& outStream){
   if (eq.rootsExist){
     // Results are appended to the opened file.
-    outStream << "Quadratic equation with the following coefficients:"
-                        << std::endl << "a: " << eq.coeffs[0] << "; b: " << eq.coeffs[1] 
-                        << "; c: " << eq.coeffs[2] << std::endl
-                        << "has the following roots" << std::endl << "Root1: " << eq.roots[0] 
-                        << "; Root2: " << eq.roots[1] << ";" << std::endl << std::endl;
+    outStream << "\nQuadratic equation with the following coefficients:"
+              << std::endl << "a: " << eq.coeffs[0] << "; b: " << eq.coeffs[1] 
+              << "; c: " << eq.coeffs[2] << std::endl
+              << "has the following roots" << std::endl << "Root1: " 
+              << eq.roots[0] << "; Root2: " << eq.roots[1] << ";\n"
+              << std::endl;
   } else {
-    std::cout << std::endl << "Quadratic equation with the following coefficients:" 
-                    << std::endl << "a: " <<eq.coeffs[0] << "; b: " << eq.coeffs[1] << "; c: " 
-                   << eq.coeffs[2]  << std::endl << "has no roots in the real domain." 
-                    << std::endl << std::endl;
+    std::cout << "\nQuadratic equation with the following coefficients:" 
+              << std::endl << "a: " <<eq.coeffs[0] << "; b: " << eq.coeffs[1]
+              << "; c: " << eq.coeffs[2]  << std::endl 
+              << "has no roots in the real domain.\n" << std::endl;
   }
   return;
 }
