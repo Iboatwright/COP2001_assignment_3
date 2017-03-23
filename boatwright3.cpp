@@ -3,7 +3,7 @@
  title  : COP 2001 Assignment #3 - 2017
  author : Ivan Boatwright
  email  : ijboatwright5153@eagle.fgcu.edu
- version: 3.3 3/22/17
+ version: 3.14 3/22/17
  
    Solves quadratic equations of the form:
         a*x^2 + b*x + c = 0
@@ -17,10 +17,6 @@
    If roots exist the results are printed to a file. If no roots exist a
    message is printed to stdout. 
  ***************************************************************************/
-
-/*TODO 1:  test against inputs.
-  TODO 2:  revise comments based on my google doc's guidelines
- */
  
 #include <iostream>
 #include <cmath>
@@ -40,7 +36,7 @@ struct equation_t {
 // commandline argument validation (must be a positive integer)
 int validateNumber(int, char*, int);
 
-// Creates new[] equation arrays for coeffs and roots. Resources need to be
+// Creates new[] equation arrays for coeffs and roots. Resources should be
 //  released before program exits.
 void equation_init(equation_t&);
 
@@ -148,7 +144,7 @@ void coeffInput(double& d, char c){
   while (!std::cin){
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
-    std::cout << "Error! Please enter a valid number for the coefficient.\n";
+    std::cout << "\nError! Please enter a valid number for the coefficient.\n";
     std::cout << "\nEnter coefficient " << c << ": ";
     std::cin >> d;
     }
@@ -163,7 +159,7 @@ void readCoeffs(equation_t& eq){
 
   while (true){  // Runs ad-infinitum until break condition is met.
     coeffInput(*eq.coeffs, 'a');
-    if (*eq.coeffs) break;  // a must not equal zero 
+    if (*eq.coeffs) {break;}  // a must not equal zero 
     else {  // operator entered zero for coefficient a
       std::cout << "\nInvalid entry. Please enter a non-zero "\
            "value for a." << std::endl;
