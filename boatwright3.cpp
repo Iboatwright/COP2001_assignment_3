@@ -38,9 +38,10 @@ struct equation_t {
 };
 
 // commandline argument validation (must be a positive integer)
-int validateNumber(int, char*);
+int validateNumber(int, char*, int);
 
-// Creates new[] equation arrays for coeffs and roots.
+// Creates new[] equation arrays for coeffs and roots. Resources need to be
+//  released before program exits.
 void equation_init(equation_t&);
 
 // Requests user to input the coefficients
@@ -60,16 +61,17 @@ void equSolver(equation_t&);
 // to stdout that no real roots exists.
 void outResults(equation_t&, std::ofstream&);
 
-// equation_cleanup releases memory resourses before program exits
+// releases memory resourses before program exits
 void resource_cleanup(equation_t*, int);
 
 int main(int argc, char* argv[]) {
   // local constants
   const char* OUTPUT_FILE = "results.dat";
+  const int max_number_size = 10000; // prevents stack overflow
 
   // number of equations to calculate
-  int number = validateNumber(argc, argv[1]);  
-  
+  int number = validateNumber(argc, argv[1], max_number_size);  
+
   // struct array to hold all the equations calculated
   equation_t quadratic[number];
   
@@ -78,7 +80,7 @@ int main(int argc, char* argv[]) {
   
   // Each iteration calculates one quadratic equation.
   for (int i=0; i < number; i++){
-    // initialize this quadratic equation
+    // Initializes this quadratic equation instance.
     equation_init(quadratic[i]);
     
     // Operator enters values for the coefficients.
@@ -93,6 +95,8 @@ int main(int argc, char* argv[]) {
   
   outStream.close();
   resource_cleanup(quadratic, number);
+  
+  // Friendly end of program message.
   if ( number > 1){
     std::cout << "( " << number << " ) equation" << ((number == 1)?" ":"s ")
                     << "calculated. Have a nice day!" << std::endl;
@@ -101,21 +105,29 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-// blah
-int validateNumber(int argc, char* argv1){
+// For invalid input, a message is displayed and 0 is returned
+int validateNumber(int argc, char* argv1, int max_number_size){
+  // atoi returns 0 for anything it can't convert to an int
   int number = (argc > 1)?std::atoi(argv1):0;
-  if (argc > 1 && !number) { // not a positive integer
+  if (argc > 1 && number < 1) { // not a positive integer
+    number = 0; // discards any negative values 
     std::cout << "Program terminated.\n" << argv1 << " is an invalid "\
-              "number of equations.\n Please enter a positive integer "\
-              "for the number of equations to calculate and run the program "\
-              "again." << std::endl;
-  } else if (argc == 1) {
+              "number of equations.\nPlease enter a positive integer "\
+              "for the number of equations to calculate\n\tand run the program again." << std::endl;
+  } else if (argc == 1) { // nothing entered on the commandline
     std::cout << "Program terminated.\nCommandline argument missing.\n"\
               "Please enter a positive integer for the number of equations"\
-              " to calculate and run the program again.\n" << std::endl;
+              " to calculate\n\tand run the program again.\n" << std::endl;
+  } else if (number > max_number_size) { // arbitrary max number size
+    // Too large a number can cause a stack overflow when
+    //  equation struct array is created.
+    number = max_number_size;
+    std::cout << "Too many equation calculations requested.\n"\
+              "Only " << max_number_size << " calculations will be "\
+              "performed" << std::endl;
   }
   
-  return number;
+  return number; // postive int or 0
 }
 
 // Assigns address of new arrays to coeffs and roots pointers
@@ -201,7 +213,8 @@ void outResults(equation_t& eq, std::ofstream& outStream){
   return;
 }
 
-// comments needed?
+// Returns resources to the heap in case the OS doesn't automatically 
+//  retreive them.
 void resource_cleanup(equation_t* eq, int number){
   for (int i=0; i<number;i++){
     
